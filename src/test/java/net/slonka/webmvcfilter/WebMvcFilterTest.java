@@ -5,6 +5,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -24,6 +25,9 @@ public class WebMvcFilterTest {
 	protected int port;
 
 	@Autowired
+	TestRestTemplate testRestTemplate;
+
+	@Autowired
 	MyFilter myFirstFilter;
 
 	@Test
@@ -37,8 +41,7 @@ public class WebMvcFilterTest {
 	}
 
 	private void makeRequest() {
-		RestTemplate restTemplate = new RestTemplate();
-		HttpStatus response = restTemplate.getForEntity(url("/"), String.class).getStatusCode();
+		HttpStatus response = testRestTemplate.getForEntity(url("/"), String.class).getStatusCode();
 		assert response.is2xxSuccessful();
 	}
 
