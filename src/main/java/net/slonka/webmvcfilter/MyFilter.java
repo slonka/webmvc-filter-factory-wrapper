@@ -1,13 +1,15 @@
 package net.slonka.webmvcfilter;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 public class MyFilter {
-    private long executedAt;
+    private AtomicLong executedAt = new AtomicLong();
 
     void execute() {
-        this.executedAt = System.nanoTime();
+        this.executedAt.set(System.nanoTime());
     }
 
     public long getExecutedAt() {
-        return executedAt;
+        return executedAt.get();
     }
 }
