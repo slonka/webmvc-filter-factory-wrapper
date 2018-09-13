@@ -13,11 +13,11 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestTemplate;
 
 @RunWith(SpringRunner.class)
+@Import(MyFilterWebMvcBeanFactoryPostProcessor.class)
 @SpringBootTest(
 		classes = {RootController.class, WebmvcfilterApplication.class},
 		webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
-@Import(MyFilterWebMvcBeanFactoryPostProcessor.class)
 public class WebMvcFilterTest {
 
 	@Value("${local.server.port}")

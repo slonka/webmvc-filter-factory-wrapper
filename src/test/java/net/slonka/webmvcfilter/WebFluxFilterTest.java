@@ -18,7 +18,6 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 		properties = "spring.main.web-application-type=reactive",
 		webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
-@ContextConfiguration(classes = WebFluxFilterTest.FilterConfiguration.class)
 public class WebFluxFilterTest {
 
 	@Autowired
