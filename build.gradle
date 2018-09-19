@@ -25,6 +25,7 @@ repositories {
 
 
 dependencies {
+	compile group: 'javax.servlet', name: 'javax.servlet-api', version: '4.0.0'
 	compile('org.springframework.boot:spring-boot-starter-web')
 	compile('org.springframework.boot:spring-boot-starter-webflux')
 	testCompile('org.springframework.boot:spring-boot-starter-test')
