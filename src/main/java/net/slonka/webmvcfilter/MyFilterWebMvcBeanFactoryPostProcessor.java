@@ -29,11 +29,12 @@ public class MyFilterWebMvcBeanFactoryPostProcessor implements BeanDefinitionReg
                         MyFilter.class);
 
         for (String myFilter : myFilters) {
+			String filterName = myFilter + "WebMvcFilter";
             BeanDefinition beanDefinition =
                     BeanDefinitionBuilder.rootBeanDefinition(MyFilterAdapterFactory.class)
-                            .addConstructorArgReference(myFilter).getBeanDefinition();
+                            .addConstructorArgReference(myFilter).addConstructorArgValue(filterName).getBeanDefinition();
 
-            registry.registerBeanDefinition(myFilter + "WebMvcFilter", beanDefinition);
+            registry.registerBeanDefinition(filterName, beanDefinition);
         }
 
     }
@@ -45,8 +46,9 @@ public class MyFilterWebMvcBeanFactoryPostProcessor implements BeanDefinitionReg
 
     public static class MyFilterAdapterFactory extends FilterRegistrationBean<Filter> {
 
-        public MyFilterAdapterFactory(MyFilter myFilter) {
+        public MyFilterAdapterFactory(MyFilter myFilter, String name) {
             super(new MyFilterWebMvcAdapter(myFilter));
+            setName(name);
         }
     }
 }
