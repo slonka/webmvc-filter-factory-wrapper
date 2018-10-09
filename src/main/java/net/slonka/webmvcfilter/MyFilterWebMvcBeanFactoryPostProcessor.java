@@ -7,6 +7,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Configuration;
 
 import javax.servlet.Filter;
@@ -42,23 +43,10 @@ public class MyFilterWebMvcBeanFactoryPostProcessor implements BeanDefinitionReg
 
     }
 
-    public static class MyFilterAdapterFactory
-            implements FactoryBean<Filter> {
-
-        MyFilter myFilter;
+    public static class MyFilterAdapterFactory extends FilterRegistrationBean<Filter> {
 
         public MyFilterAdapterFactory(MyFilter myFilter) {
-            this.myFilter = myFilter;
-        }
-
-        @Override
-        public Filter getObject() {
-            return new MyFilterWebMvcAdapter(myFilter);
-        }
-
-        @Override
-        public Class<?> getObjectType() {
-            return Filter.class;
+            super(new MyFilterWebMvcAdapter(myFilter));
         }
     }
 }

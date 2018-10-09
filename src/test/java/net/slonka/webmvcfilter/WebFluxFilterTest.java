@@ -20,21 +20,26 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 )
 public class WebFluxFilterTest {
 
-	@Autowired
-	MyFilter myFirstFilter;
+    @Autowired
+    MyFilter myFirstFilter;
+
+    @Autowired
+    MyFilter mySecondFilter;
 
 	@Autowired
 	WebTestClient webTestClient;
 
-	@Test
-	public void shouldAutoWrapFiltersForWebFlux() {
-		makeRequest();
-		assert myFirstFilter.getExecutedAt() > 0;
-	}
+    @Test
+    public void shouldAutoWrapFiltersForWebFlux() {
+        makeRequest();
+        assert myFirstFilter.getExecutedAt() > 0;
+        assert mySecondFilter.getExecutedAt() > 0;
+        assert mySecondFilter.getExecutedAt() > myFirstFilter.getExecutedAt();
+    }
 
-	private void makeRequest() {
-		webTestClient.head().uri("/").exchange().expectStatus().isOk();
-	}
+    private void makeRequest() {
+        webTestClient.head().uri("/").exchange().expectStatus().isOk();
+    }
 
 	@Configuration
 	static class FilterConfiguration {
@@ -42,5 +47,10 @@ public class WebFluxFilterTest {
 		MyFilter myFirstFilter() {
 			return new MyFilter();
 		}
+
+        @Bean
+        MyFilter mySecondFilter() {
+            return new MyFilter();
+        }
 	}
 }

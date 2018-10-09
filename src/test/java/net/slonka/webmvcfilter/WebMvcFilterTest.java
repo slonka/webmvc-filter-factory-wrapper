@@ -29,10 +29,15 @@ public class WebMvcFilterTest {
 	@Autowired
 	MyFilter myFirstFilter;
 
+	@Autowired
+	MyFilter mySecondFilter;
+
 	@Test
 	public void shouldAutoWrapFiltersForWebMvc() {
 		makeRequest();
 		assert myFirstFilter.getExecutedAt() > 0;
+		assert mySecondFilter.getExecutedAt() > 0;
+		assert mySecondFilter.getExecutedAt() > myFirstFilter.getExecutedAt();
 	}
 
 	public String url(String path) {
@@ -48,6 +53,11 @@ public class WebMvcFilterTest {
 	static class FilterConfiguration {
 		@Bean
 		MyFilter myFirstFilter() {
+			return new MyFilter();
+		}
+
+		@Bean
+		MyFilter mySecondFilter() {
 			return new MyFilter();
 		}
 	}
