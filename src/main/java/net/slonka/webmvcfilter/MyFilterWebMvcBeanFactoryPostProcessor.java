@@ -7,12 +7,14 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Configuration;
 
 import javax.servlet.Filter;
 
 @Configuration
+@ConditionalOnProperty(name = "use_postprocessor")
 public class MyFilterWebMvcBeanFactoryPostProcessor implements BeanDefinitionRegistryPostProcessor, BeanFactoryAware {
     private BeanFactory beanFactory;
 
@@ -49,6 +51,7 @@ public class MyFilterWebMvcBeanFactoryPostProcessor implements BeanDefinitionReg
         public MyFilterAdapterFactory(MyFilter myFilter, String name) {
             super(new MyFilterWebMvcAdapter(myFilter));
             setName(name);
+            setOrder(myFilter.getOrder());
         }
     }
 }

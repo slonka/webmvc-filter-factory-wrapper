@@ -7,7 +7,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
@@ -15,7 +14,10 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 @Import(MyFilterWebFluxBeanFactoryPostProcessor.class)
 @SpringBootTest(
 		classes = {RootController.class, WebmvcfilterApplication.class},
-		properties = "spring.main.web-application-type=reactive",
+		properties = {
+            "spring.main.web-application-type=reactive",
+            "use_postprocessor=false"
+        },
 		webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
 public class WebFluxFilterTest {
@@ -26,6 +28,9 @@ public class WebFluxFilterTest {
     @Autowired
     MyFilter mySecondFilter;
 
+    @Autowired
+    MyFilter myThirdFilter;
+
 	@Autowired
 	WebTestClient webTestClient;
 
@@ -35,6 +40,7 @@ public class WebFluxFilterTest {
         assert myFirstFilter.getExecutedAt() > 0;
         assert mySecondFilter.getExecutedAt() > 0;
         assert mySecondFilter.getExecutedAt() > myFirstFilter.getExecutedAt();
+        assert myThirdFilter.getExecutedAt() > mySecondFilter.getExecutedAt();
     }
 
     private void makeRequest() {
@@ -43,14 +49,19 @@ public class WebFluxFilterTest {
 
 	@Configuration
 	static class FilterConfiguration {
-		@Bean
-		MyFilter myFirstFilter() {
-			return new MyFilter();
-		}
-
         @Bean
         MyFilter mySecondFilter() {
             return new MyFilter();
+        }
+
+        @Bean
+        MyFilter myThirdFilter() {
+            return new LowPriorityFilter();
+        }
+
+        @Bean
+        MyFilter myFirstFilter() {
+            return new HighPriorityFilter();
         }
 	}
 }

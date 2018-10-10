@@ -16,7 +16,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 @Import(MyFilterWebMvcBeanFactoryPostProcessor.class)
 @SpringBootTest(
 		classes = {RootController.class, WebmvcfilterApplication.class},
-		webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
+		webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+		properties = "use_postprocessor: true"
 )
 public class WebMvcFilterTest {
 
@@ -32,12 +33,16 @@ public class WebMvcFilterTest {
 	@Autowired
 	MyFilter mySecondFilter;
 
+	@Autowired
+	MyFilter myThirdFilter;
+
 	@Test
-	public void shouldAutoWrapFiltersForWebMvc() {
+	public void shouldAutoWrapFiltersForWebFlux() {
 		makeRequest();
 		assert myFirstFilter.getExecutedAt() > 0;
 		assert mySecondFilter.getExecutedAt() > 0;
 		assert mySecondFilter.getExecutedAt() > myFirstFilter.getExecutedAt();
+		assert myThirdFilter.getExecutedAt() > mySecondFilter.getExecutedAt();
 	}
 
 	public String url(String path) {
@@ -52,13 +57,18 @@ public class WebMvcFilterTest {
 	@Configuration
 	static class FilterConfiguration {
 		@Bean
-		MyFilter myFirstFilter() {
+		MyFilter mySecondFilter() {
 			return new MyFilter();
 		}
 
 		@Bean
-		MyFilter mySecondFilter() {
-			return new MyFilter();
+		MyFilter myThirdFilter() {
+			return new LowPriorityFilter();
+		}
+
+		@Bean
+		MyFilter myFirstFilter() {
+			return new HighPriorityFilter();
 		}
 	}
 }

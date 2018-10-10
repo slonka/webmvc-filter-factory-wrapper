@@ -3,21 +3,23 @@ package net.slonka.webmvcfilter;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
-@Import(MyFilterWebMvcBeanFactoryPostProcessor.class)
 @SpringBootTest(
 		classes = {RootController.class, WebmvcfilterApplication.class},
-		webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
+		webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+		properties = "use_postprocessor: false"
 )
+@ContextConfiguration(classes = WebMvcFilterTestWithExplicitAdapters.FilterConfiguration.class)
 public class WebMvcFilterTestWithExplicitAdapters {
 
 	@Value("${local.server.port}")
@@ -27,10 +29,16 @@ public class WebMvcFilterTestWithExplicitAdapters {
 	TestRestTemplate testRestTemplate;
 
 	@Autowired
+	@Qualifier("myFirstFilter")
 	MyFilter myFirstFilter;
 
 	@Autowired
+	@Qualifier("mySecondFilter")
 	MyFilter mySecondFilter;
+
+	@Autowired
+	@Qualifier("myThirdFilter")
+	MyFilter myThirdFilter;
 
 	@Test
 	public void shouldAutoWrapFiltersForWebMvc() {
@@ -38,6 +46,7 @@ public class WebMvcFilterTestWithExplicitAdapters {
 		assert myFirstFilter.getExecutedAt() > 0;
 		assert mySecondFilter.getExecutedAt() > 0;
 		assert mySecondFilter.getExecutedAt() > myFirstFilter.getExecutedAt();
+		assert myThirdFilter.getExecutedAt() > mySecondFilter.getExecutedAt();
 	}
 
 	public String url(String path) {
@@ -51,25 +60,36 @@ public class WebMvcFilterTestWithExplicitAdapters {
 
 	@Configuration
 	static class FilterConfiguration {
-		// we do not want this
-		@Bean
-		MyFilterWebMvcAdapter myFirstFilterAdapter(MyFilter myFirstFilter) {
-			return new MyFilterWebMvcAdapter(myFirstFilter);
-		}
-
-		@Bean
-		MyFilterWebMvcAdapter mySecondFilterAdapter(MyFilter mySecondFilter) {
-			return new MyFilterWebMvcAdapter(mySecondFilter);
-		}
-
-		@Bean
-		MyFilter myFirstFilter() {
-			return new MyFilter();
-		}
-
 		@Bean
 		MyFilter mySecondFilter() {
 			return new MyFilter();
 		}
+
+		@Bean
+		MyFilter myThirdFilter() {
+			return new LowPriorityFilter();
+		}
+
+		@Bean
+		MyFilter myFirstFilter() {
+			return new HighPriorityFilter();
+		}
+
+		// we do not want this
+		@Bean
+		MyFilterWebMvcAdapter myFirstFilterAdapter(@Qualifier("myFirstFilter") MyFilter myFirstFilter) {
+			return new MyFilterWebMvcAdapter(myFirstFilter);
+		}
+
+		@Bean
+		MyFilterWebMvcAdapter mySecondFilterAdapter(@Qualifier("mySecondFilter") MyFilter mySecondFilter) {
+			return new MyFilterWebMvcAdapter(mySecondFilter);
+		}
+
+		@Bean
+		MyFilterWebMvcAdapter myThirdFilterAdapter(@Qualifier("myThirdFilter") MyFilter myThirdFilter) {
+			return new MyFilterWebMvcAdapter(myThirdFilter);
+		}
+
 	}
 }
